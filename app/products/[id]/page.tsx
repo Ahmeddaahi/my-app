@@ -4,8 +4,11 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, BarChart2, Check, Shield } from "lucide-react";
 
-export default function ProductPage({ params }: { params: { id: string } }) {
-  const product = getProductById(params.id);
+type PageParams = Promise<{ id: string }>;
+
+export default async function ProductPage({ params }: { params: PageParams }) {
+  const { id } = await params;
+  const product = getProductById(id);
   
   // If product not found, show 404 page
   if (!product) {
