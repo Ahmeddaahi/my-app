@@ -14,6 +14,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { useCart } from "@/context/cart-context";
+import { toast } from "sonner";
 
 // This component handles the client-side rendering of the product page
 export default function ProductPageWrapper({ params }: { params: { id: string } }) {
@@ -26,6 +28,7 @@ function ProductPage({ id }: { id: string }) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [rating, setRating] = useState(5);
+  const { addItem } = useCart();
   
   // If product not found, show 404 page
   if (!product) {
@@ -62,6 +65,13 @@ function ProductPage({ id }: { id: string }) {
     alert(`Thank you for your ${rating}-star review!`);
     setReviewText("");
     setRating(5);
+  };
+
+  const handleAddToCart = () => {
+    if (product && product.stock > 0) {
+      addItem(product);
+      toast.success(`${product.name} added to cart`);
+    }
   };
 
   return (
@@ -143,7 +153,11 @@ function ProductPage({ id }: { id: string }) {
           </div>
           
           <div className="flex space-x-4 mb-8">
-            <Button className="flex-1" disabled={product.stock === 0}>
+            <Button 
+              className="flex-1" 
+              disabled={product.stock === 0}
+              onClick={handleAddToCart}
+            >
               <ShoppingCart className="mr-2 h-4 w-4" />
               Add to Cart
             </Button>

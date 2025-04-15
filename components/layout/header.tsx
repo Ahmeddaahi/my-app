@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { CartButton } from "@/components/cart/cart-button";
 
 export function Header() {
   const { data: session } = useSession();
@@ -76,10 +77,7 @@ export function Header() {
             </form>
 
             <Link href="/cart">
-              <Button variant="ghost" size="icon">
-                <ShoppingBag className="h-5 w-5" />
-                <span className="sr-only">Cart</span>
-              </Button>
+              <CartButton />
             </Link>
 
             {session ? (
@@ -190,10 +188,7 @@ export function Header() {
             </div>
             <div className="flex items-center space-x-4 px-4 pt-2 border-t">
               <Link href="/cart">
-                <Button variant="ghost" size="icon">
-                  <ShoppingBag className="h-5 w-5" />
-                  <span className="sr-only">Cart</span>
-                </Button>
+                <CartButton />
               </Link>
               {!session && (
                 <Link href="/auth/signin" className="w-full">

@@ -6,34 +6,29 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/context/cart-context";
+import { toast } from "sonner";
+import { Product } from "@/lib/data";
 
-interface ProductCardProps {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  images: string[];
-  stock: number;
-  sku: string;
-  featured?: boolean;
-}
-
-export function ProductCard({
-  id,
-  name,
-  description,
-  price,
-  images,
-  stock,
-  sku,
-  featured = false,
-}: ProductCardProps) {
+export function ProductCard(product: Product) {
+  const { id, name, description, price, images, stock, sku, featured = false } = product;
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const { addItem } = useCart();
   
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsWishlisted(!isWishlisted);
+  };
+  
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (stock > 0) {
+      addItem(product);
+      toast.success(`${name} added to cart`);
+    }
   };
 
   return (
@@ -93,6 +88,7 @@ export function ProductCard({
             size="sm"
             className="flex items-center gap-1"
             disabled={stock === 0}
+            onClick={handleAddToCart}
           >
             <ShoppingCart className="h-4 w-4" />
             {stock === 0 ? "Out of stock" : "Add to cart"}
