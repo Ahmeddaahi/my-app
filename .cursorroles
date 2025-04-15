@@ -67,7 +67,7 @@
   - JWT handling
   - Protected routes
 
-### 3. Core Features - Customer Side [ ]
+### 3. Core Features - Customer Side [X]
 
 - [x] Home Layout:
   - Create `(home)` folder in `app` directory
@@ -95,15 +95,15 @@
   - Related products section:
     - Show products from same category
     - Product card carousel
-- [ ] Shopping cart:
+- [x] Shopping cart:
   - Add/remove items
   - Update quantities
   - Cart persistence
-- [ ] Checkout process:
+- [x] Checkout process:
   - Shipping information
   - Payment integration (Stripe)
   - Order confirmation
-- [ ] User dashboard:
+- [x] User dashboard:
   - Order history
   - Profile management
   - Saved addresses
