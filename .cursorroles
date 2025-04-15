@@ -95,15 +95,15 @@
   - Related products section:
     - Show products from same category
     - Product card carousel
-- [x] Shopping cart:
+- [ ] Shopping cart:
   - Add/remove items
   - Update quantities
   - Cart persistence
-- [x] Checkout process:
+- [ ] Checkout process:
   - Shipping information
   - Payment integration (Stripe)
   - Order confirmation
-- [x] User dashboard:
+- [ ] User dashboard:
   - Order history
   - Profile management
   - Saved addresses
