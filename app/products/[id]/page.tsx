@@ -4,6 +4,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, BarChart2, Check, Shield } from "lucide-react";
 
+// Define params as Promise to fix the Vercel deployment error
+// Type '{ params: { id: string; }; }' does not satisfy the constraint 'PageProps'
 type PageParams = Promise<{ id: string }>;
 
 export default async function ProductPage({ params }: { params: PageParams }) {
