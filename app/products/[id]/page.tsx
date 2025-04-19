@@ -1,25 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { use } from "react";
 import { getProductById, getProductsByCategory } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, BarChart2, Check, Shield, Star } from "lucide-react";
 import { ProductCard } from "@/components/ui/product-card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { useCart } from "@/context/cart-context";
 import { toast } from "sonner";
 
 // This component handles the client-side rendering of the product page
-export default function ProductPageWrapper({ params }: { params: { id: string } }) {
-  return <ProductPage id={params.id} />;
+export default function ProductPageWrapper({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  return <ProductPage id={resolvedParams.id} />;
 }
 
 // The main product page component
@@ -83,7 +78,7 @@ function ProductPage({ id }: { id: string }) {
           {/* Main image */}
           <div className="aspect-square bg-white rounded-lg overflow-hidden border">
             <Image
-              src={product.images[selectedImage] || "/placeholder-product.png"}
+              src={product.images[selectedImage]}
               alt={product.name}
               width={800}
               height={800}
@@ -108,6 +103,7 @@ function ProductPage({ id }: { id: string }) {
                     alt={`${product.name} - view ${index + 1}`}
                     fill
                     className="object-cover"
+                    sizes="80px"
                   />
                 </button>
               ))}
@@ -185,6 +181,18 @@ function ProductPage({ id }: { id: string }) {
         </div>
       </div>
       
+      {/* Related Products */}
+      {relatedProducts.length > 0 && (
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {relatedProducts.map((product) => (
+              <ProductCard key={product.id} {...product} />
+            ))}
+          </div>
+        </div>
+      )}
+      
       {/* Reviews Section */}
       <div className="mb-16">
         <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
@@ -249,29 +257,6 @@ function ProductPage({ id }: { id: string }) {
             <Button type="submit">Submit Review</Button>
           </form>
         </div>
-      </div>
-      
-      {/* Related Products Section */}
-      <div>
-        <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-        
-        {relatedProducts.length > 0 ? (
-          <Carousel className="w-full">
-            <CarouselContent>
-              {relatedProducts.map((relatedProduct) => (
-                <CarouselItem key={relatedProduct.id} className="md:basis-1/2 lg:basis-1/4">
-                  <div className="p-1">
-                    <ProductCard {...relatedProduct} />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        ) : (
-          <p className="text-gray-500">No related products found.</p>
-        )}
       </div>
     </div>
   );

@@ -1,136 +1,237 @@
-import { getAllProducts, getAllCategories } from "@/lib/data";
-import Link from "next/link";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Filter, Search, ShoppingCart } from "lucide-react";
-import { Product, Category } from "@/types";
+"use client";
 
-export default async function ProductsPage() {
-  const products = await getAllProducts();
-  const categories = await getAllCategories();
-  
+import { useState, useEffect } from "react";
+import { getAllProducts, getAllCategories, type Category } from "@/lib/data";
+import { ProductCard } from "@/components/ui/product-card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Filter } from "lucide-react";
+
+export default function ProductsPage() {
+  const [products, setProducts] = useState(getAllProducts());
+  const [categories, setCategories] = useState<Category[]>(getAllCategories());
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    categories: {} as Record<string, boolean>,
+    priceRange: {
+      min: "",
+      max: ""
+    }
+  });
+  const [sortBy, setSortBy] = useState("newest");
+
+  // Initialize category filters
+  useEffect(() => {
+    const initialCategories = categories.reduce((acc, category) => {
+      acc[category.id] = false;
+      return acc;
+    }, {} as Record<string, boolean>);
+    setFilters(prev => ({
+      ...prev,
+      categories: initialCategories
+    }));
+  }, [categories]);
+
+  // Apply filters and search
+  useEffect(() => {
+    let result = [...products];
+
+    // Apply search filter
+    if (searchQuery) {
+      result = result.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply category filters
+    const activeCategories = Object.entries(filters.categories)
+      .filter(([_, isChecked]) => isChecked)
+      .map(([categoryId]) => categoryId);
+
+    if (activeCategories.length > 0) {
+      result = result.filter(product => 
+        activeCategories.includes(product.categoryId)
+      );
+    }
+
+    // Apply price range filter
+    if (filters.priceRange.min !== "") {
+      result = result.filter(product => 
+        product.price >= parseFloat(filters.priceRange.min)
+      );
+    }
+    if (filters.priceRange.max !== "") {
+      result = result.filter(product => 
+        product.price <= parseFloat(filters.priceRange.max)
+      );
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case "newest":
+        // Sort by ID as a proxy for newest (higher ID = newer)
+        result.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+        break;
+      case "price-low-high":
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high-low":
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case "name-a-z":
+        result.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "name-z-a":
+        result.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+    }
+
+    setFilteredProducts(result);
+  }, [products, searchQuery, filters, sortBy]);
+
+  const handleCategoryChange = (categoryId: string) => {
+    setFilters(prev => ({
+      ...prev,
+      categories: {
+        ...prev.categories,
+        [categoryId]: !prev.categories[categoryId]
+      }
+    }));
+  };
+
+  const handlePriceRangeChange = (type: 'min' | 'max', value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      priceRange: {
+        ...prev.priceRange,
+        [type]: value
+      }
+    }));
+  };
+
+  const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortBy(event.target.value);
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      categories: Object.keys(filters.categories).reduce((acc, categoryId) => {
+        acc[categoryId] = false;
+        return acc;
+      }, {} as Record<string, boolean>),
+      priceRange: {
+        min: "",
+        max: ""
+      }
+    });
+    setSearchQuery("");
+    setSortBy("newest");
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Products</h1>
+      <h1 className="text-3xl font-bold mb-8">Products</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Filters sidebar */}
-        <div className="lg:col-span-1 order-2 lg:order-1">
-          <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-24">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        {/* Filters Sidebar */}
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-lg shadow">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-medium text-lg">Filters</h2>
-              <Filter className="h-5 w-5 text-gray-500" />
+              <h2 className="text-xl font-semibold">Filters</h2>
+              <Filter className="h-5 w-5" />
             </div>
-            
+
             {/* Categories */}
             <div className="mb-6">
-              <h3 className="font-medium mb-2">Categories</h3>
-              <ul className="space-y-2">
-                {categories.map((category: Category) => (
-                  <li key={category.id}>
-                    <Link 
-                      href={`/products?category=${category.id}`}
-                      className="text-gray-600 hover:text-primary text-sm flex items-center"
-                    >
-                      <span className="block w-4 h-4 border rounded-sm mr-2"></span>
-                      {category.name}
-                    </Link>
-                  </li>
+              <h3 className="font-medium mb-3">Categories</h3>
+              <div className="space-y-2">
+                {categories.map((category) => (
+                  <label key={category.id} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={filters.categories[category.id] || false}
+                      onChange={() => handleCategoryChange(category.id)}
+                      className="rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <span>{category.name}</span>
+                  </label>
                 ))}
-              </ul>
+              </div>
             </div>
-            
+
             {/* Price Range */}
             <div className="mb-6">
-              <h3 className="font-medium mb-2">Price Range</h3>
+              <h3 className="font-medium mb-3">Price Range</h3>
               <div className="grid grid-cols-2 gap-2">
-                <div className="flex border rounded-md">
-                  <span className="bg-gray-50 text-gray-500 px-2 py-1 text-sm border-r">$</span>
-                  <input 
-                    type="number" 
-                    placeholder="Min" 
-                    className="w-full p-1 text-sm outline-none"
-                  />
-                </div>
-                <div className="flex border rounded-md">
-                  <span className="bg-gray-50 text-gray-500 px-2 py-1 text-sm border-r">$</span>
-                  <input 
-                    type="number" 
-                    placeholder="Max" 
-                    className="w-full p-1 text-sm outline-none"
-                  />
-                </div>
+                <Input
+                  type="number"
+                  placeholder="Min"
+                  value={filters.priceRange.min}
+                  onChange={(e) => handlePriceRangeChange('min', e.target.value)}
+                  className="w-full"
+                />
+                <Input
+                  type="number"
+                  placeholder="Max"
+                  value={filters.priceRange.max}
+                  onChange={(e) => handlePriceRangeChange('max', e.target.value)}
+                  className="w-full"
+                />
               </div>
             </div>
-            
-            {/* Sort */}
+
+            {/* Sort By */}
             <div className="mb-6">
-              <h3 className="font-medium mb-2">Sort By</h3>
-              <select className="w-full p-2 border rounded-md text-sm">
+              <h3 className="font-medium mb-3">Sort By</h3>
+              <select
+                value={sortBy}
+                onChange={handleSortChange}
+                className="w-full rounded-md border border-gray-300 p-2"
+              >
                 <option value="newest">Newest First</option>
-                <option value="price_low">Price: Low to High</option>
-                <option value="price_high">Price: High to Low</option>
-                <option value="popular">Most Popular</option>
+                <option value="price-low-high">Price: Low to High</option>
+                <option value="price-high-low">Price: High to Low</option>
+                <option value="name-a-z">Name: A to Z</option>
+                <option value="name-z-a">Name: Z to A</option>
               </select>
             </div>
-            
-            <Button className="w-full">Apply Filters</Button>
+
+            <Button
+              onClick={clearFilters}
+              variant="outline"
+              className="w-full"
+            >
+              Clear Filters
+            </Button>
           </div>
         </div>
-        
-        {/* Product grid */}
-        <div className="lg:col-span-3 order-1 lg:order-2">
-          {/* Search */}
+
+        {/* Products Grid */}
+        <div className="md:col-span-3">
+          {/* Search Bar */}
           <div className="mb-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full py-2 px-4 pr-10 border rounded-lg focus:outline-none focus:ring focus:border-primary"
-              />
-              <div className="absolute right-3 top-2.5 text-gray-400">
-                <Search className="h-5 w-5" />
-              </div>
-            </div>
+            <Input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full"
+            />
           </div>
-          
-          {/* Products grid */}
+
+          {/* Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product: Product) => (
-              <div key={product.id} className="bg-white rounded-lg shadow-sm border overflow-hidden hover:shadow-md transition-shadow">
-                <Link href={`/products/${product.id}`} className="block">
-                  <div className="h-48 relative">
-                    <Image
-                      src={product.image || "https://placehold.co/400x300/e2e8f0/a1a1aa?text=Product"}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-medium text-gray-900 mb-1">{product.name}</h3>
-                    <p className="text-gray-500 text-sm mb-2 line-clamp-2">{product.description}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold">${product.price.toFixed(2)}</span>
-                      <Button size="sm" variant="outline" className="rounded-full p-2 h-auto">
-                        <ShoppingCart className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </Link>
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
+                <ProductCard key={product.id} {...product} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-500">No products found matching your criteria.</p>
               </div>
-            ))}
-          </div>
-          
-          {/* Pagination */}
-          <div className="mt-8 flex justify-center">
-            <nav className="flex items-center gap-1">
-              <Button variant="outline" size="sm" disabled>Previous</Button>
-              <Button variant="outline" size="sm" className="bg-primary text-white">1</Button>
-              <Button variant="outline" size="sm">2</Button>
-              <Button variant="outline" size="sm">3</Button>
-              <Button variant="outline" size="sm">Next</Button>
-            </nav>
+            )}
           </div>
         </div>
       </div>

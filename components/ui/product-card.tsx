@@ -13,7 +13,7 @@ import { Product } from "@/lib/data";
 export function ProductCard(product: Product) {
   const { id, name, description, price, images, stock, sku, featured = false } = product;
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [isImageError, setIsImageError] = useState(false);
   const { addItem } = useCart();
   
   const toggleWishlist = (e: React.MouseEvent) => {
@@ -23,8 +23,6 @@ export function ProductCard(product: Product) {
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
-    
     if (stock > 0) {
       addItem(product);
       toast.success(`${name} added to cart`);
@@ -32,69 +30,48 @@ export function ProductCard(product: Product) {
   };
 
   return (
-    <div className="group relative bg-white border rounded-lg overflow-hidden flex flex-col">
-      {featured && (
-        <div className="absolute top-0 left-0 z-10 m-2">
-          <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-            Featured
-          </span>
-        </div>
-      )}
-      
-      <div className="aspect-square overflow-hidden relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 z-10 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
-          onClick={toggleWishlist}
-        >
-          <Heart
-            className={cn(
-              "h-5 w-5 transition-colors",
-              isWishlisted ? "fill-red-500 text-red-500" : "text-gray-600"
-            )}
+    <Link href={`/products/${id}`} className="group">
+      <div className="bg-white rounded-lg border shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+        <div className="aspect-square relative bg-gray-100">
+          <Image
+            src={isImageError ? "/images/placeholder.jpg" : images[0]}
+            alt={name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
+            onError={() => setIsImageError(true)}
+            priority={featured}
           />
-          <span className="sr-only">Add to wishlist</span>
-        </Button>
-        
-        <Link href={`/products/${id}`}>
-          {imageError ? (
-            <div className="flex items-center justify-center h-full w-full bg-gray-100">
-              <ImageIcon className="h-16 w-16 text-gray-400" />
+        </div>
+        <div className="p-4">
+          <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">{name}</h3>
+          <p className="text-gray-500 text-sm mb-2 line-clamp-2">{description}</p>
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-primary">${price.toFixed(2)}</span>
+            <div className="flex gap-2">
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-8 w-8"
+                onClick={handleAddToCart}
+                disabled={stock === 0}
+              >
+                <ShoppingCart className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-8 w-8"
+              >
+                <Heart className="h-4 w-4" />
+              </Button>
             </div>
-          ) : (
-            <Image
-              src={images?.[0] || "/placeholder-product.png"}
-              alt={name}
-              className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
-              width={300}
-              height={300}
-              onError={() => setImageError(true)}
-            />
+          </div>
+          {stock === 0 && (
+            <p className="text-red-500 text-sm mt-2">Out of stock</p>
           )}
-        </Link>
-      </div>
-      
-      <div className="flex flex-col flex-grow p-4">
-        <Link href={`/products/${id}`} className="flex-grow">
-          <h3 className="text-sm font-medium text-gray-900">{name}</h3>
-          <p className="mt-1 text-sm text-gray-500 line-clamp-2">{description}</p>
-        </Link>
-        
-        <div className="mt-3 flex items-center justify-between">
-          <p className="text-lg font-medium text-gray-900">${price.toFixed(2)}</p>
-          <Button
-            variant="outline" 
-            size="sm"
-            className="flex items-center gap-1"
-            disabled={stock === 0}
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart className="h-4 w-4" />
-            {stock === 0 ? "Out of stock" : "Add to cart"}
-          </Button>
         </div>
       </div>
-    </div>
+    </Link>
   );
 } 

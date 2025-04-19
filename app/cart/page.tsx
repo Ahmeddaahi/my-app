@@ -6,41 +6,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ShoppingCart, Trash, Plus, Minus, ArrowRight } from "lucide-react";
-
-// Mock cart data - in a real app, this would come from a state management solution like Zustand
-const initialCartItems = [
-  {
-    id: "1",
-    name: "Classic White T-Shirt",
-    price: 19.99,
-    quantity: 2,
-    image: "https://placehold.co/400x400/white/lightgray?text=T-Shirt",
-  },
-  {
-    id: "3",
-    name: "Slim Fit Jeans",
-    price: 49.99,
-    quantity: 1,
-    image: "https://placehold.co/400x400/5881B0/white?text=Jeans",
-  },
-];
+import { useCart } from "@/context/cart-context";
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(initialCartItems);
-  
-  const updateQuantity = (id: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
-  
-  const removeItem = (id: string) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
+  const { state, removeItem, updateQuantity } = useCart();
+  const cartItems = state?.items || [];
   
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = 5.99;
@@ -110,7 +80,7 @@ export default function CartPage() {
                   </div>
                   
                   {/* Quantity */}
-                  <div className="lg:col-span-2 flex justify-center">
+                  <div className="lg:col-span-2 flex items-center justify-center">
                     <div className="lg:hidden text-sm text-gray-500 mb-1 mr-2">Quantity:</div>
                     <div className="flex items-center border rounded-md">
                       <button
