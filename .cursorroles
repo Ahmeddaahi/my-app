@@ -69,19 +69,19 @@
 
 ### 3. Core Features - Customer Side [X]
 
-- [x] Home Layout:
+- [X] Home Layout:
   - Create `(home)` folder in `app` directory
   - Header with logo, search bar, and navigation
   - Footer with links and social media
-- [x] Homepage:
+- [X] Homepage:
   - banner carousel using Shadcn carousel component with images from public/images
   - latest products
-- [x] Products Catalog:
+- [X] Products Catalog:
   - Sidebar with categories and filters
   - Search results
   - Product grid
   - Pagination
-- [x] Product pages:
+- [X] Product pages:
   - Create product detail page layout
   - Implement image gallery with thumbnails
   - Add product information section:
@@ -95,14 +95,16 @@
   - Related products section:
     - Show products from same category
     - Product card carousel
-- [ ] Shopping cart:
+- [X] Shopping cart:
   - Add/remove items
   - Update quantities
   - Cart persistence
 - [ ] Checkout process:
   - Shipping information
-  - Payment integration (Stripe)
+  - Payment integration (stripe)
   - Order confirmation
+  - Payment success and failure pages
+  - and add an other payment method option which is ethiopian mobile money like ebirr, esahal, and telebirr to pay to this number 251995817222 name Ahmed Bashir Ahmed
 - [ ] User dashboard:
   - Order history
   - Profile management

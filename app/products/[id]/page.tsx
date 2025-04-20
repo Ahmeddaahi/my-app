@@ -65,7 +65,12 @@ function ProductPage({ id }: { id: string }) {
   const handleAddToCart = () => {
     if (product && product.stock > 0) {
       addItem(product);
-      toast.success(`${product.name} added to cart`);
+      toast.success(`${product.name} added to cart`, {
+        action: {
+          label: "View Cart",
+          onClick: () => window.location.href = "/cart"
+        }
+      });
     }
   };
 

@@ -25,7 +25,12 @@ export function ProductCard(product: Product) {
     e.preventDefault();
     if (stock > 0) {
       addItem(product);
-      toast.success(`${name} added to cart`);
+      toast.success(`${name} added to cart`, {
+        action: {
+          label: "View Cart",
+          onClick: () => window.location.href = "/cart"
+        }
+      });
     }
   };
 
