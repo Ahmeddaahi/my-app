@@ -106,26 +106,10 @@
   - Payment success and failure pages
   - and add an other payment method option which is ethiopian mobile money like ebirr, esahal, and telebirr to pay to this number 251995817222 name Ahmed Bashir Ahmed
 - [ ] User dashboard:
-  - [ ] Order history:
-    - [ ] List of past orders
-    - [ ] Order details view
-    - [ ] Order status tracking
-    - [ ] Download invoice/receipt
-  - [ ] Profile management:
-    - [ ] Update personal information
-    - [ ] Change password
-    - [ ] Email preferences
-    - [ ] Notification settings
-  - [ ] Saved addresses:
-    - [ ] Add new address
-    - [ ] Edit existing addresses
-    - [ ] Set default shipping address
-    - [ ] Set default billing address
-  - [ ] Wishlist:
-    - [ ] Add/remove items
-    - [ ] Move items to cart
-    - [ ] Share wishlist
-    - [ ] Price alerts
+  - Order history
+  - Profile management
+  - Saved addresses
+  - Wishlist
 
 ### 4. Admin Dashboard [ ]
 
