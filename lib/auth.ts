@@ -15,13 +15,17 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log('Auth attempt with credentials:', { email: credentials?.email });
+        
         if (!credentials?.email || !credentials?.password) {
+          console.log('Missing credentials');
           return null;
         }
 
         const user = await getUserByEmail(credentials.email as string);
 
         if (!user || !user.password) {
+          console.log('User not found or no password');
           return null;
         }
 
@@ -29,6 +33,8 @@ export const authOptions: NextAuthOptions = {
           credentials.password as string,
           user.password
         );
+
+        console.log('Password validation result:', isPasswordValid);
 
         if (!isPasswordValid) {
           return null;
